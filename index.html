@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>個人形象網站</title>
+
+<style>
+:root{
+    --primary:#9b4dff;
+    --secondary:#d48cff;
+    --bg:#080b13;
+    --card:#101827;
+    --text:#ffffff;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:var(--bg);
+    color:white;
+    font-family:"Segoe UI",sans-serif;
+    overflow-x:hidden;
+}
+
+/* 粒子背景 */
+#bgCanvas{
+    position:fixed;
+    inset:0;
+    z-index:-2;
+}
+
+/* 滑鼠光暈 */
+.cursor-glow{
+    width:400px;
+    height:400px;
+    border-radius:50%;
+    position:fixed;
+    pointer-events:none;
+    background:radial-gradient(circle,
+    rgba(155,77,255,.22),
+    transparent 70%);
+    z-index:-1;
+    transform:translate(-50%,-50%);
+}
+
+/* Header */
+.hero{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    padding:60px;
+}
+
+.content{
+    max-width:1100px;
+    width:100%;
+}
+
+/* 大頭貼 */
+.avatar{
+    position:absolute;
+    right:50px;
+    top:40px;
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    overflow:hidden;
+    border:4px solid var(--primary);
+    box-shadow:
+    0 0 20px var(--primary),
+    0 0 50px var(--primary);
+    animation:pulse 3s infinite;
+}
+
+.avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+@keyframes pulse{
+    0%,100%{
+        box-shadow:0 0 20px var(--primary);
+    }
+    50%{
+        box-shadow:
+        0 0 30px var(--primary),
+        0 0 70px var(--secondary);
+    }
+}
+
+/* 吉祥物 */
+.mascot{
+    width:260px;
+    position:absolute;
+    left:5%;
+    top:15%;
+    animation:float 6s ease-in-out infinite;
+}
+
+@keyframes float{
+    0%{transform:translateY(0px) rotate(0deg);}
+    50%{transform:translateY(-25px) rotate(8deg);}
+    100%{transform:translateY(0px) rotate(0deg);}
+}
+
+h1{
+    font-size:4rem;
+    margin-bottom:20px;
+}
+
+.gradient{
+    background:linear-gradient(
+        90deg,
+        #fff,
+        #b66cff,
+        #ffb4ff
+    );
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.typing{
+    font-size:1.4rem;
+    color:#d8d8d8;
+    min-height:40px;
+}
+
+.about{
+    margin-top:40px;
+    max-width:700px;
+    line-height:1.8;
+    color:#bfc6d6;
+}
+
+/* Section */
+.section{
+    padding:100px 10%;
+}
+
+.section-title{
+    text-align:center;
+    font-size:2.5rem;
+    margin-bottom:50px;
+}
+
+/* Github Cards */
+.projects{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:30px;
+}
+
+.card{
+    background:rgba(16,24,39,.7);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:25px;
+    padding:30px;
+    transition:.5s;
+    position:relative;
+    overflow:hidden;
+}
+
+.card::before{
+    content:'';
+    position:absolute;
+    width:250%;
+    height:250%;
+    left:-80%;
+    top:-80%;
+    background:
+    linear-gradient(
+        45deg,
+        transparent,
+        rgba(155,77,255,.4),
+        transparent
+    );
+    transform:rotate(25deg);
+}
+
+.card:hover{
+    transform:translateY(-10px) scale(1.03);
+    box-shadow:
+    0 10px 30px rgba(155,77,255,.4);
+}
+
+.card h3{
+    margin-bottom:15px;
+    color:#d48cff;
+}
+
+.card p{
+    color:#cfd5df;
+    line-height:1.7;
+}
+
+.btn{
+    margin-top:20px;
+    display:inline-block;
+    text-decoration:none;
+    color:white;
+    background:linear-gradient(
+    90deg,
+    #7d32ff,
+    #bb6fff);
+    padding:12px 20px;
+    border-radius:12px;
+    transition:.4s;
+}
+
+.btn:hover{
+    transform:scale(1.08);
+}
+
+/* Fade In */
+.fade{
+    opacity:0;
+    transform:translateY(60px);
+    transition:1s;
+}
+
+.fade.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* Footer */
+footer{
+    text-align:center;
+    padding:50px;
+    color:#999;
+}
+
+/* 響應式 */
+@media(max-width:768px){
+
+    h1{
+        font-size:2.6rem;
+    }
+
+    .avatar{
+        width:110px;
+        height:110px;
+        right:20px;
+        top:20px;
+    }
+
+    .mascot{
+        width:180px;
+        opacity:.5;
+    }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="cursor-glow"></div>
+
+<section class="hero">
+
+    <!-- 右上角大頭貼 -->
+    <div class="avatar">
+        <!-- 換成你的照片 -->
+        <img src="avatar.jpg">
+    </div>
+
+    <!-- 紫色刺毛吉祥物 -->
+    <svg class="mascot" viewBox="0 0 300 300">
+        <g fill="#9b4dff">
+            <circle cx="150" cy="150" r="60"/>
+            <g id="spikes"></g>
+        </g>
+        <circle cx="135" cy="140" r="12" fill="white"/>
+        <circle cx="170" cy="145" r="15" fill="white"/>
+        <circle cx="137" cy="140" r="5"/>
+        <circle cx="172" cy="145" r="6"/>
+    </svg>
+
+    <div class="content">
+
+        <h1 class="gradient">
+    Hello, I'm Sea UrchinKing
+</h1>
+
+        <div class="typing"></div>
+
+       <div class="about">
+    專注於海膽繁養殖技術，
+    致力於海膽育苗、養殖管理、
+    飼料開發與產業應用研究，
+    持續探索智慧養殖與永續海洋資源發展。
+</div>
+
+    </div>
+
+</section>
+
+<section class="section fade">
+
+    <h2 class="section-title gradient">
+        GitHub Projects
+    </h2>
+
+    <div class="projects">
+
+        <div class="card">
+
+            <h3>繁殖成果發表</h3>
+
+            <p>
+                種苗
+            </p>
+
+            <a class="btn"
+               href="https://github.com/yourname/project1"
+               target="_blank">
+               View Project
+            </a>
+
+        </div>
+
+        <div class="card">
+
+            <h3>育成成果發表</h3>
+
+            <p>
+                外觀 生殖腺 
+            </p>
+
+            <a class="btn"
+               href="https://github.com/yourname/project2"
+               target="_blank">
+               View Project
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+<footer>
+    © 2025 Your Portfolio
+</footer>
+
+<script>
+
+/* =================================
+   打字機效果
+================================= */
+
+const texts = [
+"Sea Urchin Aquaculture",
+"Sea Urchin Breeding",
+"Marine Biotechnology",
+"Ocean Sustainability"
+];
+let textIndex = 0;
+let charIndex = 0;
+
+const typing = document.querySelector('.typing');
+
+function type(){
+
+    if(charIndex < texts[textIndex].length){
+
+        typing.innerHTML +=
+        texts[textIndex].charAt(charIndex);
+
+        charIndex++;
+
+        setTimeout(type,80);
+
+    }else{
+
+        setTimeout(()=>{
+            typing.innerHTML="";
+            charIndex=0;
+            textIndex=(textIndex+1)%texts.length;
+            type();
+        },1800);
+
+    }
+}
+
+type();
+
+/* =================================
+   滑鼠光暈
+================================= */
+
+const glow=document.querySelector('.cursor-glow');
+
+document.addEventListener('mousemove',(e)=>{
+    glow.style.left=e.clientX+"px";
+    glow.style.top=e.clientY+"px";
+});
+
+/* =================================
+   粒子背景
+================================= */
+
+const canvas=document.getElementById("bgCanvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+for(let i=0;i<120;i++){
+
+    particles.push({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        r:Math.random()*2,
+        vx:(Math.random()-.5)*0.5,
+        vy:(Math.random()-.5)*0.5
+    });
+
+}
+
+function animate(){
+
+    ctx.clearRect(0,0,
+    canvas.width,
+    canvas.height);
+
+    particles.forEach(p=>{
+
+        p.x+=p.vx;
+        p.y+=p.vy;
+
+        if(p.x<0||p.x>canvas.width)
+            p.vx*=-1;
+
+        if(p.y<0||p.y>canvas.height)
+            p.vy*=-1;
+
+        ctx.beginPath();
+        ctx.arc(
+            p.x,p.y,p.r,
+            0,Math.PI*2
+        );
+
+        ctx.fillStyle=
+        "rgba(180,120,255,.8)";
+
+        ctx.fill();
+
+    });
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+/* =================================
+   SVG 刺毛產生器
+================================= */
+
+const spikes=
+document.getElementById("spikes");
+
+for(let i=0;i<24;i++){
+
+    let angle=i*15;
+
+    let line=
+    document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "polygon"
+    );
+
+    let len=
+    80+Math.random()*50;
+
+    line.setAttribute(
+    "points",
+    `145,90 155,90 150,${90-len}`
+    );
+
+    line.setAttribute(
+    "transform",
+    `rotate(${angle} 150 150)`
+    );
+
+    line.setAttribute(
+    "fill",
+    "#9b4dff"
+    );
+
+    spikes.appendChild(line);
+}
+
+/* =================================
+   區塊進場動畫
+================================= */
+
+const observer=
+new IntersectionObserver(entries=>{
+
+entries.forEach(entry=>{
+
+if(entry.isIntersecting){
+
+entry.target.classList.add('show');
+
+}
+
+});
+
+});
+
+document.querySelectorAll('.fade')
+.forEach(el=>observer.observe(el));
+
+/* =================================
+   Resize
+================================= */
+
+window.addEventListener('resize',()=>{
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+});
+
+</script>
+
+</body>
+</html>
